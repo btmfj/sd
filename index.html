@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Google Drive 動画クリック再生</title>
+  <title>Google Drive 動画（全画面対応版）</title>
   <style>
     body {
       background: #111;
@@ -17,19 +17,11 @@
       font-weight: 500;
       margin-bottom: 20px;
     }
-    #player {
+    video {
       width: 90%;
       max-width: 900px;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      margin: 0 auto;
       border-radius: 8px;
-      overflow: hidden;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
+      background: #000;
     }
     button {
       margin-top: 20px;
@@ -53,41 +45,43 @@
   </style>
 </head>
 <body>
-  <h1>🎬 Google Drive 動画プレイヤー</h1>
+  <h1>🎬 Google Drive 動画プレイヤー（全画面対応）</h1>
 
-  <div id="player">
-    <!-- 再生ボタンを押すとここに iframe が生成されます -->
+  <video id="myVideo" controls playsinline muted loop>
+    <source src="https://docs.google.com/uc?export=download&id=1hQ6VQeXAuY_aIDZ94dnxeJ88Pmetuufy" type="video/mp4">
+    お使いのブラウザは video タグに対応していません。
+  </video>
+
+  <div>
+    <button id="playBtn">▶ 再生する</button>
+    <button id="fullscreenBtn">⛶ 全画面表示</button>
   </div>
 
-  <button id="playBtn">▶ 再生する</button>
-
   <div class="note">
-    ※ボタンをクリックすると、Google Drive の動画を埋め込み再生します。
+    ※再生ボタンを押すと動画が再生され、全画面にも切り替え可能です。
   </div>
 
   <script>
-    const fileId = "1hQ6VQeXAuY_aIDZ94dnxeJ88Pmetuufy";
-    const player = document.getElementById("player");
-    const playBtn = document.getElementById("playBtn");
+    const video = document.getElementById('myVideo');
+    const playBtn = document.getElementById('playBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
 
-    function playDriveVideo() {
-      // iframeを生成してGoogle Driveのpreviewページを埋め込む
-      const iframe = document.createElement("iframe");
-      iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
-      iframe.allow = "autoplay; fullscreen";
-      iframe.allowFullscreen = true;
+    playBtn.addEventListener('click', () => {
+      video.play();
+    });
 
-      // 既存の内容をクリアして再生用iframeを挿入
-      player.innerHTML = "";
-      player.appendChild(iframe);
-
-      // ボタンを無効化して文言を変える
-      playBtn.disabled = true;
-      playBtn.textContent = "再生中...";
-      playBtn.style.background = "#555";
-    }
-
-    playBtn.addEventListener("click", playDriveVideo);
+    fullscreenBtn.addEventListener('click', () => {
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitEnterFullscreen) {
+        // iPhone Safari専用API
+        video.webkitEnterFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      } else {
+        alert("お使いのブラウザでは全画面表示に対応していません。");
+      }
+    });
   </script>
 </body>
 </html>
