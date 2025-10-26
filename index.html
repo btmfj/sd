@@ -3,135 +3,91 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Google Drive 自動再生デモ</title>
+  <title>Google Drive 動画クリック再生</title>
   <style>
-    html,body { height:100%; margin:0; font-family:system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP"; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; }
-    .player { width:90%; max-width:900px; aspect-ratio:16/9; background:#000; position:relative; }
-    .controls { margin-top:12px; text-align:center; }
-    input[type="text"]{ width:70%; padding:8px; border-radius:6px; border:1px solid #444; background:#222; color:#fff; }
-    button { padding:8px 12px; margin-left:6px; border-radius:6px; border:none; cursor:pointer; background:#0a84ff; color:#fff; }
-    .note{ font-size:13px; color:#bbb; margin-top:8px; }
-    iframe { width:100%; height:100%; border:0; }
+    body {
+      background: #111;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 40px 0;
+      font-family: "Segoe UI", "Noto Sans JP", sans-serif;
+    }
+    h1 {
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    #player {
+      width: 90%;
+      max-width: 900px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      margin: 0 auto;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      font-size: 16px;
+      color: #fff;
+      background: #0a84ff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #006fe0;
+    }
+    .note {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #bbb;
+    }
   </style>
 </head>
 <body>
-  <div>
-    <div class="player" id="player">
-      <!-- iframe がここに挿入されます -->
-    </div>
+  <h1>🎬 Google Drive 動画プレイヤー</h1>
 
-    <div class="controls">
-      <!-- ここに共有リンクを貼れば読み込めます（例を入れてあるのでそのままでも動作） -->
-      <input id="driveUrl" type="text" placeholder="Google Drive 共有リンクを貼る" value="https://drive.google.com/file/d/1hQ6VQeXAuY_aIDZ94dnxeJ88Pmetuufy/view?usp=sharing">
-      <button id="loadBtn">読み込んで再生</button>
-      <button id="muteToggle">ミュート ON</button>
-      <div class="note" id="note">
-        ※自動再生はブラウザのポリシーに依存します。確実に自動再生したい場合は「ミュート」を有効にしてください。
-      </div>
-    </div>
+  <div id="player">
+    <!-- 再生ボタンを押すとここに iframe が生成されます -->
+  </div>
+
+  <button id="playBtn">▶ 再生する</button>
+
+  <div class="note">
+    ※ボタンをクリックすると、Google Drive の動画を埋め込み再生します。
   </div>
 
   <script>
-    // Drive の URL から fileId を抽出するユーティリティ
-    function extractDriveId(url) {
-      if (!url) return null;
-      try {
-        // common patterns:
-        // https://drive.google.com/file/d/FILE_ID/view?usp=sharing
-        // https://drive.google.com/open?id=FILE_ID
-        // https://docs.google.com/uc?export=download&id=FILE_ID
-        const patterns = [
-          /\/d\/([a-zA-Z0-9_-]{10,})/,            // /d/FILE_ID
-          /id=([a-zA-Z0-9_-]{10,})/,              // id=FILE_ID
-          /\/open\?id=([a-zA-Z0-9_-]{10,})/,      // /open?id=FILE_ID
-        ];
-        for (const p of patterns) {
-          const m = url.match(p);
-          if (m && m[1]) return m[1];
-        }
-        // last resort: if the url itself looks like an ID
-        const maybe = url.trim();
-        if (/^[a-zA-Z0-9_-]{10,}$/.test(maybe)) return maybe;
-      } catch (e) { /* ignore */ }
-      return null;
-    }
+    const fileId = "1hQ6VQeXAuY_aIDZ94dnxeJ88Pmetuufy";
+    const player = document.getElementById("player");
+    const playBtn = document.getElementById("playBtn");
 
-    const playerEl = document.getElementById('player');
-    const driveUrlInput = document.getElementById('driveUrl');
-    const loadBtn = document.getElementById('loadBtn');
-    const muteToggleBtn = document.getElementById('muteToggle');
-    let isMuted = true; // 初期をミュート推奨にしておく
-
-    function buildPreviewUrl(fileId, options = {}) {
-      // Google Drive preview URL
-      // autoplay=1 を付けると試みる。ただしブラウザの挙動に依る。
-      const params = new URLSearchParams();
-      if (options.autoplay) params.set('autoplay', '1');
-      if (options.loop) params.set('loop', '1');
-      if (options.start) params.set('start', String(options.start));
-      // usp=sharing はなくても可
-      params.set('usp','sharing');
-      return `https://drive.google.com/file/d/${fileId}/preview?${params.toString()}`;
-    }
-
-    function loadDriveVideo(url) {
-      const fileId = extractDriveId(url);
-      if (!fileId) {
-        alert('Drive のファイルIDを抽出できませんでした。共有リンク形式（/d/FILE_ID/ や id=FILE_ID）を確認してください。');
-        return;
-      }
-
-      // 既存 iframe を削除
-      playerEl.innerHTML = '';
-
-      // Drive preview は iframe 埋め込みが一般的
-      const iframe = document.createElement('iframe');
-      iframe.src = buildPreviewUrl(fileId, { autoplay: 1, loop: 1 });
-      // autoplay を許可
-      iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+    function playDriveVideo() {
+      // iframeを生成してGoogle Driveのpreviewページを埋め込む
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://drive.google.com/file/d/${fileId}/preview`;
+      iframe.allow = "autoplay; fullscreen";
       iframe.allowFullscreen = true;
-      iframe.loading = 'eager';
-      iframe.style.background = '#000';
 
-      // note: many browsers block autoplay unless muted. Drive の preview iframe 自体には "muted" 属性が無いため、
-      // ブラウザ側でミュートポリシーにより自動再生が阻止される場合があります。
-      // その場合はユーザーに「再生」ボタンのクリックを促す UI を追加するか、
-      // 自分で <video> 要素を用いて直接ダウンロードURLを指定する方法を検討してください（CORS や共有設定の制約あり）。
-      playerEl.appendChild(iframe);
+      // 既存の内容をクリアして再生用iframeを挿入
+      player.innerHTML = "";
+      player.appendChild(iframe);
 
-      // 表示ノートを更新
-      const note = document.getElementById('note');
-      note.textContent = '読み込み完了。自動再生はブラウザポリシーに依存します — ミュートが ON のとき成功しやすいです。';
+      // ボタンを無効化して文言を変える
+      playBtn.disabled = true;
+      playBtn.textContent = "再生中...";
+      playBtn.style.background = "#555";
     }
 
-    // ミュートトグル（注意：iframe の video を直接ミュートできないため、ここでは "ミュート推奨" 表示の切替）
-    function toggleMute() {
-      isMuted = !isMuted;
-      muteToggleBtn.textContent = isMuted ? 'ミュート ON' : 'ミュート OFF';
-      const note = document.getElementById('note');
-      if (isMuted) {
-        note.textContent = 'ミュート ON — 自動再生されやすい設定です。';
-      } else {
-        note.textContent = 'ミュート OFF — 一部ブラウザでは自動再生がブロックされる可能性があります。';
-      }
-      // 実際に iframe 内の動画を JS から直接ミュートすることは同一オリジン制約で難しいため、
-      // ミュート設定はユーザー向けの指示（例: 自分で動画をミュートにしてアップロード）での対応を推奨します。
-    }
-
-    loadBtn.addEventListener('click', () => {
-      const url = driveUrlInput.value.trim();
-      if (!url) { alert('共有リンクを入力してください。'); return; }
-      loadDriveVideo(url);
-    });
-
-    muteToggleBtn.addEventListener('click', toggleMute);
-
-    // --- ページ読み込み時に既定の URL を自動で読み込む ---
-    window.addEventListener('DOMContentLoaded', () => {
-      // inputにプレースホルダの FILE_ID を変えて利用してください。
-      const initial = driveUrlInput.value.trim();
-      if (initial) loadDriveVideo(initial);
-    });
+    playBtn.addEventListener("click", playDriveVideo);
   </script>
 </body>
 </html>
