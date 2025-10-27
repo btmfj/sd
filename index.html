@@ -1,87 +1,17 @@
 <!doctype html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Google Drive 動画（全画面対応版）</title>
+  <meta charset="utf-8">
+  <title>Dropbox 動画ストリーミング再生</title>
   <style>
-    body {
-      background: #111;
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 40px 0;
-      font-family: "Segoe UI", "Noto Sans JP", sans-serif;
-    }
-    h1 {
-      font-weight: 500;
-      margin-bottom: 20px;
-    }
-    video {
-      width: 90%;
-      max-width: 900px;
-      border-radius: 8px;
-      background: #000;
-    }
-    button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      font-size: 16px;
-      color: #fff;
-      background: #0a84ff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-    button:hover {
-      background: #006fe0;
-    }
-    .note {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #bbb;
-    }
+    body { margin:0; background:#000; display:flex; align-items:center; justify-content:center; height:100vh; }
+    video { width:90%; max-width:900px; }
   </style>
 </head>
 <body>
-  <h1>🎬 Google Drive 動画プレイヤー（全画面対応）</h1>
-
-  <video id="myVideo" controls playsinline muted loop>
-    <source src="https://docs.google.com/uc?export=download&id=1hQ6VQeXAuY_aIDZ94dnxeJ88Pmetuufy" type="video/mp4">
+  <video controls playsinline>
+    <source src="https://www.dropbox.com/scl/fi/6acix1x4qw82wlqpm0r23/The-First-Slam-Dunk.mp4?rlkey=14e0xk4b2hsz0rriqyjhgx6gf&st=0pd9tgxa&raw=1" type="video/mp4">
     お使いのブラウザは video タグに対応していません。
   </video>
-
-  <div>
-    <button id="playBtn">▶ 再生する</button>
-    <button id="fullscreenBtn">⛶ 全画面表示</button>
-  </div>
-
-  <div class="note">
-    ※再生ボタンを押すと動画が再生され、全画面にも切り替え可能です。
-  </div>
-
-  <script>
-    const video = document.getElementById('myVideo');
-    const playBtn = document.getElementById('playBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-
-    playBtn.addEventListener('click', () => {
-      video.play();
-    });
-
-    fullscreenBtn.addEventListener('click', () => {
-      if (video.requestFullscreen) {
-        video.requestFullscreen();
-      } else if (video.webkitEnterFullscreen) {
-        // iPhone Safari専用API
-        video.webkitEnterFullscreen();
-      } else if (video.webkitRequestFullscreen) {
-        video.webkitRequestFullscreen();
-      } else {
-        alert("お使いのブラウザでは全画面表示に対応していません。");
-      }
-    });
-  </script>
 </body>
 </html>
