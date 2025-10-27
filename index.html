@@ -2,47 +2,16 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MKV 動画プレイヤー（Dropbox 用）</title>
+  <title>Dropbox 動画ストリーミング再生</title>
   <style>
-    body { background:#111; color:#fff; text-align:center; margin:0; padding:40px 0; font-family:"Segoe UI","Noto Sans JP",sans-serif; }
-    h1 { margin-bottom:20px; }
-    video { width:90%; max-width:900px; border-radius:8px; background:#000; }
-    button { margin:12px 6px; padding:12px 24px; font-size:16px; color:#fff; background:#0a84ff; border:none; border-radius:6px; cursor:pointer; transition:background .2s; }
-    button:hover { background:#006fe0; }
-    .note { margin-top:15px; font-size:14px; color:#bbb; }
+    body { margin:0; background:#000; display:flex; align-items:center; justify-content:center; height:100vh; }
+    video { width:90%; max-width:900px; }
   </style>
 </head>
 <body>
-  <h1>🎬 Dropbox MKV 動画プレイヤー</h1>
-  <video id="myVideo" playsinline controls preload="metadata">
-    <source id="videoSource" src="https://www.dropbox.com/scl/fi/py9gwnol7xuds7zkyxpnz/The-First-Slam-Dunk.mkv?rlkey=s91wmt1subgycovaow7bjecy5&st=dzwtfbak&raw=1" type="video/x-matroska">
-    お使いのブラウザでは video タグに対応していないか、形式が再生できません。
+  <video controls playsinline>
+    <source src="https://www.dropbox.com/scl/fi/6acix1x4qw82wlqpm0r23/The-First-Slam-Dunk.mp4?rlkey=14e0xk4b2hsz0rriqyjhgx6gf&st=0pd9tgxa&raw=1" type="video/mp4">
+    お使いのブラウザは video タグに対応していません。
   </video>
-  <div>
-    <button id="playBtn">▶ 再生する</button>
-    <button id="fullscreenBtn">⛶ 全画面表示</button>
-  </div>
-  <div class="note">
-    ※クリックで再生。全画面ボタンを押せば対応ブラウザではフルスクリーンになります。  
-    ただし .mkv 形式のため、再生できないブラウザもあります。
-  </div>
-  <script>
-    const video = document.getElementById('myVideo');
-    const playBtn = document.getElementById('playBtn');
-    const fullscreenBtn = document.getElementById('fullscreenBtn');
-
-    playBtn.addEventListener('click', () => {
-      video.play().catch(err => {
-        alert('動画の再生に失敗しました。\nブラウザがこの形式をサポートしていない可能性があります。');
-        console.error('再生エラー:', err);
-      });
-    });
-
-    fullscreenBtn.addEventListener('click', () => {
-      if (video.requestFullscreen) {
-        video.requestFullscreen();
-      } else if (video.webkitEnterFullscreen) {
-        // iOS Safari 等
-        video.webkitEnterFullscreen();
-      } else if (video.webkitRequestFull
+</body>
+</html>
